@@ -216,7 +216,7 @@ def create_label(row_data):
         weight_display = "0kg"
         print(f"Warning: 无法处理重量值: {row_data['重量kg']}")
 
-    values = ['无锡拳宁物资贸易有限公司', row_data['钢厂编码'], row_data['订单号'], 
+    values = ['无锡攀宁物资贸易有限公司', row_data['钢厂编码'], row_data['订单号'], 
              row_data['物料类别'], row_data['行号'], row_data['物料编码'], 
              row_data['物料名称'], row_data['物料材质'], row_data['母卷号'], 
              row_data['子卷号'], row_data['材料性能'], weight_display, 
