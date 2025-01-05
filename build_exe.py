@@ -1,17 +1,20 @@
 import PyInstaller.__main__
 import os
 
-# 获取当前目录
-current_dir = os.path.dirname(os.path.abspath(__file__))
+# 确保输出目录存在
+if not os.path.exists('dist'):
+    os.makedirs('dist')
 
 PyInstaller.__main__.run([
-    'label_generator.py',  # 主程序文件
-    '--name=二维码生成器',  # 生成的exe名称
-    '--windowed',  # 不显示控制台窗口
-    '--onefile',  # 打包成单个exe文件
-    '--icon=label.ico',  # 如果你有图标文件的话
-    '--add-data=simsun.ttc;.',  # 添加宋体字体文件
-    f'--distpath={os.path.join(current_dir, "dist")}',  # 输出目录
-    '--clean',  # 清理临时文件
-    '--noconfirm',  # 不确认覆盖
+    'main.py',                            # 主程序文件
+    '--name=攀宁二维码标签生成器',         # 程序名称
+    '--windowed',                         # 使用 GUI 模式
+    '--noconfirm',                        # 覆盖现有文件
+    '--clean',                            # 清理临时文件
+    '--add-data=README.md;.',             # 添加额外文件
+    '--hidden-import=PIL._tkinter_finder', # 添加隐藏导入
+    '--icon=icon.ico',                    # 程序图标（如果有）
+    '--distpath=dist',                    # 输出目录
+    '--workpath=build',                   # 工作目录
+    '--specpath=build',                   # spec文件目录
 ]) 
