@@ -352,13 +352,6 @@ def create_label(row_data):
             return value_str.zfill(len(str(value)))
         return value_str
 
-    # 处理特定字段的小数点
-    row_data = row_data.copy()
-    decimal_fields = ['订单号', '行号', '物料名称']
-    for field in decimal_fields:
-        if field in row_data:
-            row_data[field] = remove_decimal(row_data[field])
-
     # 处理重量显示
     try:
         if pd.isna(row_data['重量kg']):
@@ -398,6 +391,59 @@ def create_label(row_data):
         print(f"Error creating QR text: {str(e)}")
         print(f"Row data: {row_data}")
         raise
+
+    # 准备表格数据
+    values = [
+        '无锡攀宁物资贸易有限公司',  # 固定的供应商名称
+        row_data['钢厂编码'], 
+        row_data['订单号'],
+        row_data['物料类别'], 
+        row_data['行号'], 
+        row_data['物料编码'],
+        str(row_data['物料名称']).strip(),  # 只去除首尾空格，保持原格式
+        row_data['物料材质'], 
+        row_data['母卷号'],
+        row_data['子卷号'], 
+        row_data['材料性能'], 
+        weight_display,
+        row_data['生产日期']
+    ]
+
+    # 绘制表格和文字
+    current_y = margin
+    for label, value in zip(labels, values):
+        # 绘制边框
+        draw.rectangle([margin, current_y, table_width, current_y+cell_height], 
+                      outline='black')
+        
+        # 绘制分隔线
+        mid_x = margin + (table_width - margin) // 2
+        draw.line([mid_x, current_y, mid_x, current_y+cell_height], 
+                 fill='black')
+        
+        # 计算文字大小
+        label_bbox = draw.textbbox((0, 0), label, font=font)
+        value_bbox = draw.textbbox((0, 0), str(value), font=font)
+        
+        # 计算文字位置（水平和垂直居中）
+        label_width = label_bbox[2] - label_bbox[0]
+        label_height = label_bbox[3] - label_bbox[1]
+        value_width = value_bbox[2] - value_bbox[0]
+        value_height = value_bbox[3] - value_bbox[1]
+        
+        # 左侧文字位置
+        label_x = margin + (mid_x - margin - label_width) // 2
+        label_y = current_y + (cell_height - label_height) // 2
+        
+        # 右侧文字位置
+        value_x = mid_x + (table_width - mid_x - value_width) // 2
+        value_y = current_y + (cell_height - value_height) // 2
+        
+        # 写入文字
+        draw.text((label_x, label_y), label, font=font, fill='black')
+        draw.text((value_x, value_y), str(value), font=font, fill='black')
+        
+        current_y += cell_height
 
     # 生成两个相同的二维码并粘贴到图片上
     qr_img = create_qr_code(qr_text)
