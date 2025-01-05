@@ -16,32 +16,50 @@ build_exe_options = {
     ],
 }
 
-# 创建开始菜单快捷方式
+# 创建快捷方式
 shortcut_table = [
-    ("ProgramMenuShortcut",
-     "ProgramMenuFolder",
-     "攀宁二维码标签生成器",
-     "TARGETDIR",
-     "[TARGETDIR]攀宁二维码标签生成器.exe",
-     None,
-     "攀宁二维码标签生成器",
-     "[TARGETDIR]攀宁二维码标签生成器.exe",
-     0,
-     None,
-     None,
-     "TARGETDIR"
+    # 桌面快捷方式
+    ("DesktopShortcut",        # Shortcut
+     "DesktopFolder",          # Directory_
+     "攀宁二维码标签生成器",     # Name
+     "TARGETDIR",              # Component_
+     "[TARGETDIR]攀宁二维码标签生成器.exe",   # Target
+     None,                     # Arguments
+     "攀宁二维码标签生成器",     # Description
+     None,                     # Hotkey
+     None,                     # Icon
+     None,                     # IconIndex
+     None,                     # ShowCmd
+     "TARGETDIR",              # WkDir
+     ),
+    
+    # 开始菜单快捷方式
+    ("ProgramMenuShortcut",    # Shortcut
+     "ProgramMenuFolder",      # Directory_
+     "攀宁二维码标签生成器",     # Name
+     "TARGETDIR",              # Component_
+     "[TARGETDIR]攀宁二维码标签生成器.exe",   # Target
+     None,                     # Arguments
+     "攀宁二维码标签生成器",     # Description
+     None,                     # Hotkey
+     None,                     # Icon
+     None,                     # IconIndex
+     None,                     # ShowCmd
+     "TARGETDIR",              # WkDir
      )
 ]
 
-# 配置MSI安装程序
+# MSI数据
 msi_data = {
     "Shortcut": shortcut_table
 }
 
+# MSI选项
 bdist_msi_options = {
     'data': msi_data,
     'initial_target_dir': r'[ProgramFilesFolder]\攀宁二维码标签生成器',
     'upgrade_code': '{9F13ACDF-A3BE-11EE-A506-0242AC120002}',
+    'add_to_path': False,
     'install_icon': "app.ico"
 }
 
@@ -62,7 +80,9 @@ setup(
             "main.py",
             base=base,
             target_name="攀宁二维码标签生成器.exe",
-            icon="app.ico"
+            icon="app.ico",
+            shortcut_name="攀宁二维码标签生成器",
+            shortcut_dir="DesktopFolder"
         )
     ]
 ) 

@@ -33,9 +33,21 @@ class LabelGeneratorApp:
         self.output_entry.grid(row=1, column=1, padx=5, pady=5)
         ttk.Button(main_frame, text="选择目录", command=self.select_output_dir).grid(row=1, column=2, padx=5, pady=5)
         
+        # 打开授权文件按钮（放在输出目录标签下方）
+        self.license_button = ttk.Button(main_frame, text="打开授权文件", 
+                                       command=self.open_license_file)
+        self.license_button.grid(row=2, column=0, padx=5, pady=5, sticky=tk.W)
+        
+        # 添加授权状态显示
+        self.license_status = ttk.Label(main_frame, text="未授权版本", foreground='red')
+        self.license_status.grid(row=2, column=1, padx=5, pady=5, sticky=tk.W)
+        
+        # 初始检查授权状态
+        self.update_license_status()
+        
         # 按钮框架
         button_frame = ttk.Frame(main_frame)
-        button_frame.grid(row=2, column=1, pady=10)
+        button_frame.grid(row=3, column=1, pady=10)  # 行号改为3
         
         # 生成按钮和停止按钮
         self.generate_button = ttk.Button(button_frame, text="生成标签", command=self.generate_labels)
@@ -49,16 +61,16 @@ class LabelGeneratorApp:
         
         # 进度条
         self.progress = ttk.Progressbar(main_frame, length=400, mode='determinate')
-        self.progress.grid(row=3, column=0, columnspan=3, pady=5)
+        self.progress.grid(row=4, column=0, columnspan=3, pady=5)  # 行号改为4
         
         # 状态标签
         self.status_var = tk.StringVar(value="请选择Excel文件")
         self.status_label = ttk.Label(main_frame, textvariable=self.status_var)
-        self.status_label.grid(row=4, column=0, columnspan=3, pady=5)
+        self.status_label.grid(row=5, column=0, columnspan=3, pady=5)  # 行号改为5
 
         # 添加日志框
         log_frame = ttk.LabelFrame(main_frame, text="日志输出", padding="5")
-        log_frame.grid(row=5, column=0, columnspan=3, sticky=(tk.W, tk.E, tk.N, tk.S), pady=5)
+        log_frame.grid(row=6, column=0, columnspan=3, sticky=(tk.W, tk.E, tk.N, tk.S), pady=5)  # 行号改为6
         
         # 创建日志文本框和滚动条
         self.log_text = tk.Text(log_frame, height=8, width=60)  # 减小高度和宽度
@@ -260,23 +272,76 @@ class LabelGeneratorApp:
             self.stop_flag = False
 
     def check_license(self):
-        """检查授权文件"""
+        """检查授权状态"""
+        try:
+            if getattr(sys, 'frozen', False):
+                application_path = os.path.dirname(sys.executable)
+            else:
+                application_path = os.path.dirname(os.path.abspath(__file__))
+                
+            license_path = os.path.join(application_path, 'license.txt')
+            if os.path.exists(license_path):
+                with open(license_path, 'r') as f:
+                    license_key = f.read().strip()
+                    return license_key == '5d9ecfb1-8d59-4296-883a-4dd7caf9d377'
+        except:
+            pass
+        return False
+
+    def update_license_status(self):
+        """更新授权状态显示"""
+        if self.check_license():
+            self.license_status.config(text="已授权版本", foreground='green')
+            self.is_licensed = True
+        else:
+            self.license_status.config(text="未授权版本", foreground='red')
+            self.is_licensed = False
+
+    def open_license_file(self):
+        """打开授权文件"""
         try:
             # 获取程序运行目录
             if getattr(sys, 'frozen', False):
-                # 如果是打包后的exe
                 application_path = os.path.dirname(sys.executable)
             else:
-                # 如果是直接运行的python脚本
                 application_path = os.path.dirname(os.path.abspath(__file__))
-                
-            # 检查授权文件
+            
+            # 授权文件路径
             license_path = os.path.join(application_path, 'license.txt')
-            with open(license_path, 'r') as f:
-                license_key = f.read().strip()
-                return license_key == '5d9ecfb1-8d59-4296-883a-4dd7caf9d377'
-        except:
-            return False
+            
+            # 如果文件不存在，创建一个空文件
+            if not os.path.exists(license_path):
+                with open(license_path, 'w', encoding='utf-8') as f:
+                    f.write('# 请在此处输入授权码，输入后保存即可实时生效\n')
+            
+            # 记录文件的最后修改时间
+            last_modified = os.path.getmtime(license_path) if os.path.exists(license_path) else 0
+            
+            # 使用系统默认程序打开文件
+            if sys.platform == 'win32':
+                os.startfile(license_path)
+            else:
+                import subprocess
+                subprocess.run(['xdg-open', license_path])
+            
+            self.log_message("已打开授权文件，请输入授权码并保存。")
+            
+            # 启动一个检查文件变化的循环
+            def check_file_change():
+                try:
+                    current_modified = os.path.getmtime(license_path)
+                    if current_modified > last_modified:
+                        self.update_license_status()
+                        self.log_message("检测到授权文件已更新，授权状态已更新。")
+                        return  # 如果文件已更新，停止检查
+                    self.root.after(1000, check_file_change)  # 每秒检查一次
+                except Exception as e:
+                    print(f"检查文件变化时出错: {e}")
+            
+            self.root.after(1000, check_file_change)  # 开始检查循环
+            
+        except Exception as e:
+            messagebox.showerror("错误", f"无法打开授权文件：{str(e)}")
 
 def create_qr_code(text):
     qr = qrcode.QRCode(
