@@ -6,45 +6,28 @@ from cx_Freeze import setup, Executable
 with open('license.txt', 'w') as f:
     f.write('')
 
+# 获取Python安装路径
+PYTHON_INSTALL_DIR = r"D:\Python\Python38-32"
+
 # Win7 32位配置
 build_exe_options = {
-    "packages": [
-        "pandas", 
-        "PIL", 
-        "qrcode", 
-        "tkinter",
-        "numpy",
-        "openpyxl",
-        "json",
-        "datetime",
-        "six",
-        "appdirs",
-        "packaging",
-        "pyparsing"
-    ],
+    "packages": ["os", "sys", "tkinter", "pandas", "PIL", "qrcode"],
     "includes": [
-        "tkinter", 
         "tkinter.ttk",
         "tkinter.messagebox",
-        "tkinter.filedialog",
-        "PIL.Image",
-        "PIL.ImageTk",
-        "pandas.core",
-        "pandas.io.excel"
+        "tkinter.filedialog"
     ],
-    "excludes": ["test", "distutils"],
     "include_files": [
         ("app.ico", "app.ico"),
         ("license.txt", "license.txt"),
         ("template.xlsx", "template.xlsx"),
-        ("config.json", "config.json")
+        ("config.json", "config.json"),
+        (os.path.join(PYTHON_INSTALL_DIR, 'DLLs', 'tcl86t.dll'), os.path.join('lib', 'tcl86t.dll')),
+        (os.path.join(PYTHON_INSTALL_DIR, 'DLLs', 'tk86t.dll'), os.path.join('lib', 'tk86t.dll'))
     ],
-    "include_msvcr": True,  # 包含Visual C++ 运行库
-    "optimize": 2,  # 优化字节码
-    "build_exe": "build/exe.win32-3.8-win7",  # 指定输出目录
-    "replace_paths": [("*", "")],  # 移除路径信息
-    "zip_include_packages": "*",  # 包含所有包
-    "zip_exclude_packages": ""    # 不排除任何包
+    "excludes": ["unittest", "email", "html", "http", "xml", "pydoc"],
+    "include_msvcr": True,
+    "build_exe": os.path.join("build", "exe.win32-3.8-win7")
 }
 
 # 创建快捷方式
@@ -77,13 +60,7 @@ bdist_msi_options = {
     'upgrade_code': '{9F13ACDF-A3BE-11EE-A506-0242AC120003}',
     'add_to_path': False,
     'install_icon': "app.ico",
-    'target_name': "攀宁二维码标签生成器_Win7_32位",  # 指定MSI文件名
-    'all_users': True,  # 为所有用户安装
-    'summary_data': {
-        'author': '攀宁科技',
-        'comments': 'Win7 32位版本',
-        'keywords': 'QR Code Generator'
-    }
+    'target_name': "攀宁二维码标签生成器_Win7_32位"
 }
 
 # 确保使用Win32GUI
@@ -101,11 +78,10 @@ setup(
     },
     executables=[
         Executable(
-            "label_generator.py",  # 使用正确的入口文件名
+            "label_generator.py",
             base=base,
             target_name="攀宁二维码标签生成器.exe",
-            icon="app.ico",
-            copyright="Copyright (C) 2024 攀宁科技"  # 添加版权信息
+            icon="app.ico"
         )
     ]
 ) 
