@@ -385,16 +385,22 @@ def create_label(row_data):
     
     # 加载字体
     try:
-        # 尝试使用系统宋体
-        font = ImageFont.truetype("simsun.ttc", 40)
+        # 尝试使用系统黑体（加粗）
+        font = ImageFont.truetype("simhei.ttf", 55)  # 使用黑体，字号55
     except:
         try:
-            # 备选：尝试使用系统默认中文字体
-            font = ImageFont.truetype("simhei.ttf", 40)
+            # 备选：尝试使用系统粗宋体
+            font = ImageFont.truetype("simsunb.ttf", 55)  # 使用粗宋体，字号55
         except:
-            # 如果都失败，使用默认字体
-            font = ImageFont.load_default()
-            print("Warning: 无法加载中文字体，使用默认字体")
+            try:
+                # 第三选择：普通宋体
+                font = ImageFont.truetype("simsun.ttc", 55)
+                print("Warning: 无法加载粗体字体，使用普通宋体")
+            except:
+                # 如果都失败，使用默认字体，但保持大字号
+                default_font = ImageFont.load_default()
+                font = default_font.font_variant(size=55)
+                print("Warning: 无法加载中文字体，使用默认字体（大字号）")
 
     # 表格边距和单元格大小
     margin = 20
